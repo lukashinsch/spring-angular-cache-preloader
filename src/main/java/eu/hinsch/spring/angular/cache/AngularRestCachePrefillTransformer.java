@@ -15,7 +15,9 @@ import org.springframework.web.servlet.resource.TransformedResource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -84,7 +86,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
                                 .contains(url)
                 )
                 .findFirst()
-                .get()
+                .orElseThrow(() -> new RuntimeException("no handler method found for " + url))
                 .getValue();
     }
 
@@ -96,14 +98,13 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
                 .append("')")
                 .append(".run(function($cacheFactory) {")
                 .append("var httpCache = $cacheFactory.get('$http');");
-        cache.entrySet().stream().forEach(
-                entry ->
-                        script.append("httpCache.put('")
-                                .append(entry.getKey())
-                                .append("','")
-                                .append(entry.getValue())
-                                .append("');")
+
+        script.append(cache.entrySet()
+                        .stream()
+                        .map(entry -> "httpCache.put('" + entry.getKey() + "','" + entry.getValue() + "');")
+                        .reduce("", (a, b) -> a + b)
         );
+
         script.append("});");
         return script.toString();
     }
