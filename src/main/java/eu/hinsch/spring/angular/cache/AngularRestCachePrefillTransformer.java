@@ -106,6 +106,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
         );
 
         script.append("});");
+        script.append("</script>");
         return script.toString();
     }
 
