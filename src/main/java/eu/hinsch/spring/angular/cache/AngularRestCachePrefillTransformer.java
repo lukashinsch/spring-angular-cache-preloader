@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.resource.TransformedResource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,7 @@ import static java.util.Arrays.asList;
 /**
  * Created by lukas.hinsch on 08.05.2015.
  */
+@Component
 public class AngularRestCachePrefillTransformer extends ResourceTransformerSupport{
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
@@ -41,7 +45,13 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
         this.applicationContext = applicationContext;
         this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;
-        cachedUrls = asList(environment.getProperty("cache.preload.urls", "").split(","));
+        String urls = environment.getProperty("cache.preload.urls", "");
+        if (StringUtils.isEmpty(urls)) {
+            cachedUrls = Collections.emptyList();
+        }
+        else {
+            cachedUrls = asList(urls.split(","));
+        }
         placeholder = environment.getProperty("cache.preload.placeholder", "{cachePreloadScript}");
         module = environment.getRequiredProperty("cache.preload.module");
     }
@@ -62,7 +72,9 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
 
             try {
                 ContentBufferingResponse response = new ContentBufferingResponse();
-                requestMappingHandlerAdapter.handle(new UrlRewritingRequestWrapper(request, cachedUrl), response, handlerMethod);
+                Object controller = applicationContext.getBean((String) handlerMethod.getBean());
+                HandlerMethod controllerHandlerMethod = new HandlerMethod(controller, handlerMethod.getMethod());
+                requestMappingHandlerAdapter.handle(new UrlRewritingRequestWrapper(request, cachedUrl), response, controllerHandlerMethod);
                 cache.put(cachedUrl, response.getResponseContent());
             } catch (Exception e) {
                 throw new RuntimeException("error caching request " + cachedUrl, e);
