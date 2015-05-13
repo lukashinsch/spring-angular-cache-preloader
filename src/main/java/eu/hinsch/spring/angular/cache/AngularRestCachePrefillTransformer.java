@@ -73,37 +73,50 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
 
         String content = IOUtils.toString(transformedResource.getInputStream());
 
-        Map<String,String> cache = new HashMap<>();
-
-        for (String cachedUrl : cachedUrls) {
-            HandlerMethod handlerMethod = getHandlerMethod(cachedUrl);
-
-            try {
-                ContentBufferingResponse response = new ContentBufferingResponse();
-                Object controller = applicationContext.getBean((String) handlerMethod.getBean());
-                HandlerMethod controllerHandlerMethod = new HandlerMethod(controller, handlerMethod.getMethod());
-                requestMappingHandlerAdapter.handle(new UrlRewritingRequestWrapper(request, cachedUrl), response, controllerHandlerMethod);
-                cache.put(cachedUrl, response.getResponseContent());
-            } catch (Exception e) {
-                throw new RuntimeException("error caching request " + cachedUrl, e);
-            }
-
-        }
-
-        content = content.replace(placeholder, createScript(cache));
+        Map<String, String> cache = createCache(request);
+        String script = createScript(cache);
+        content = content.replace(placeholder, script);
 
         return new TransformedResource(transformedResource, content.getBytes("UTF-8"));
     }
 
-    private HandlerMethod getHandlerMethod(String url) {
+    private Map<String, String> createCache(HttpServletRequest request) {
+        Map<String,String> cache = new HashMap<>();
+
+        for (String cachedUrl : cachedUrls) {
+            String controllerResponse = executeControllerMethod(request, cachedUrl);
+            cache.put(cachedUrl, controllerResponse);
+        }
+        return cache;
+    }
+
+    private String executeControllerMethod(HttpServletRequest request, String cachedUrl) {
+        ContentBufferingResponse response = new ContentBufferingResponse();
+        HandlerMethod controllerHandlerMethod = createControllerHandlerMethod(cachedUrl);
+
+        try {
+            requestMappingHandlerAdapter.handle(new UrlRewritingRequestWrapper(request, cachedUrl), response, controllerHandlerMethod);
+        } catch (Exception e) {
+            throw new RuntimeException("error caching request " + cachedUrl, e);
+        }
+        return response.getResponseContent();
+    }
+
+    private HandlerMethod createControllerHandlerMethod(String cachedUrl) {
+        HandlerMethod handlerMethod = getOriginalHandlerMethod(cachedUrl);
+        Object controller = applicationContext.getBean((String) handlerMethod.getBean());
+        return new HandlerMethod(controller, handlerMethod.getMethod());
+    }
+
+    private HandlerMethod getOriginalHandlerMethod(String url) {
         final Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
         return handlerMethods
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getKey()
-                                .getPatternsCondition()
-                                .getPatterns()
-                                .contains(url)
+                                    .getPatternsCondition()
+                                    .getPatterns()
+                                    .contains(url)
                 )
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("no handler method found for " + url))
@@ -111,7 +124,6 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
     }
 
     private String createScript(Map<String, String> cache) {
-
         Map<String,Object> model = new HashMap<>();
         model.put("module", module);
         model.put("caches", cache.entrySet());
