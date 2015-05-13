@@ -1,11 +1,14 @@
 package eu.hinsch.spring.angular.cache;
 
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -36,6 +39,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
     private final List<String> cachedUrls;
     private final String placeholder;
     private final String module;
+    private final Configuration freemarkerConfig;
 
     @Autowired
     public AngularRestCachePrefillTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
@@ -54,6 +58,10 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
         }
         placeholder = environment.getProperty("cache.preload.placeholder", "{cachePreloadScript}");
         module = environment.getRequiredProperty("cache.preload.module");
+
+        freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates");
+
     }
 
 
@@ -102,24 +110,16 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
                 .getValue();
     }
 
-    // TODO template
     private String createScript(Map<String, String> cache) {
-        StringBuilder script = new StringBuilder("<script>")
-                .append("angular.module('")
-                .append(module)
-                .append("')")
-                .append(".run(function($cacheFactory) {")
-                .append("var httpCache = $cacheFactory.get('$http');");
 
-        script.append(cache.entrySet()
-                        .stream()
-                        .map(entry -> "httpCache.put('" + entry.getKey() + "','" + entry.getValue() + "');")
-                        .reduce("", (a, b) -> a + b)
-        );
-
-        script.append("});");
-        script.append("</script>");
-        return script.toString();
+        Map<String,Object> model = new HashMap<>();
+        model.put("module", module);
+        model.put("caches", cache.entrySet());
+        try {
+            return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate("prefill-cache.html.ftl"), model);
+        } catch (IOException | TemplateException e) {
+            throw new RuntimeException("error processing template", e);
+        }
     }
 
 }
