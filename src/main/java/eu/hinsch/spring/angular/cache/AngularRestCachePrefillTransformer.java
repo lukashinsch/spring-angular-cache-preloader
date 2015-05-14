@@ -30,14 +30,14 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     private final ApplicationContext applicationContext;
     private final RequestMappingHandlerAdapter requestMappingHandlerAdapter;
-    private AngularRestCachePrefillConfigurationProperties config;
+    private AngularRestCachePrefillConfiguration config;
     private final Configuration freemarkerConfig;
 
     @Autowired
     public AngularRestCachePrefillTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
             final ApplicationContext applicationContext,
             final RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-            final AngularRestCachePrefillConfigurationProperties config) {
+            final AngularRestCachePrefillConfiguration config) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
         this.applicationContext = applicationContext;
         this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;

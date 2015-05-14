@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Component
 @ConfigurationProperties(prefix = "cache.preload")
-public class AngularRestCachePrefillConfigurationProperties {
+public class AngularRestCachePrefillConfiguration {
 
     private List<String> urls;
 
