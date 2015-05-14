@@ -114,7 +114,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
                 .filter(entry -> entry.getKey()
                                     .getPatternsCondition()
                                     .getPatterns()
-                                    .contains(url)
+                                    .contains(url.startsWith("/") ? url : "/" + url)
                 )
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("no handler method found for " + url))

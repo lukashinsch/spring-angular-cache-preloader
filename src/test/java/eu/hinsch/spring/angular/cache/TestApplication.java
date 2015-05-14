@@ -26,7 +26,7 @@ public class TestApplication extends WebMvcConfigurerAdapter {
         SpringApplication.run(TestApplication.class, args);
     }
 
-    @RequestMapping("/api/simple-list")
+    @RequestMapping(value = "/api/simple-list", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public List<String> simpleList() {
         System.out.println("simpleList");

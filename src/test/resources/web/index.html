@@ -12,7 +12,7 @@
         $scope.load();
 
         function getList() {
-            return $resource('/api/simple-list', {}, {
+            return $resource('api/simple-list', {}, {
                 query : {
                     method : 'GET',
                     cache : true,
