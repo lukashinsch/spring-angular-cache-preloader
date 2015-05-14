@@ -4,3 +4,7 @@ cache:
     urls:
       - api/simple-list
       - api/long-list
+    parameterizedUrls:
+      - url: api/steps/{by}
+        parameters:
+          by: some expression
