@@ -5,10 +5,9 @@ import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -19,47 +18,33 @@ import org.springframework.web.servlet.resource.TransformedResource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static java.util.Arrays.asList;
 
 /**
  * Created by lukas.hinsch on 08.05.2015.
  */
+@Component
 public class AngularRestCachePrefillTransformer extends ResourceTransformerSupport{
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     private final ApplicationContext applicationContext;
     private final RequestMappingHandlerAdapter requestMappingHandlerAdapter;
-    private final List<String> cachedUrls;
-    private final String placeholder;
-    private final String module;
+    private AngularRestCachePrefillConfigurationProperties config;
     private final Configuration freemarkerConfig;
 
     @Autowired
     public AngularRestCachePrefillTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
             final ApplicationContext applicationContext,
             final RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-            final Environment environment) {
+            final AngularRestCachePrefillConfigurationProperties config) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
         this.applicationContext = applicationContext;
         this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;
-        String urls = environment.getProperty("cache.preload.urls", "");
-        if (StringUtils.isEmpty(urls)) {
-            cachedUrls = Collections.emptyList();
-        }
-        else {
-            cachedUrls = asList(urls.split(","));
-        }
-        placeholder = environment.getProperty("cache.preload.placeholder", "{cachePreloadScript}");
-        module = environment.getRequiredProperty("cache.preload.module");
+        this.config = config;
 
         freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates");
-
     }
 
 
@@ -73,7 +58,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
 
         Map<String, String> cache = createCache(request);
         String script = createScript(cache);
-        content = content.replace(placeholder, script);
+        content = content.replace(config.getPlaceholder(), script);
 
         return new TransformedResource(transformedResource, content.getBytes("UTF-8"));
     }
@@ -81,9 +66,9 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
     private Map<String, String> createCache(HttpServletRequest request) {
         Map<String,String> cache = new HashMap<>();
 
-        for (String cachedUrl : cachedUrls) {
-            String controllerResponse = executeControllerMethod(request, cachedUrl);
-            cache.put(cachedUrl, controllerResponse);
+        for (String url : config.getUrls()) {
+            String controllerResponse = executeControllerMethod(request, url);
+            cache.put(url, controllerResponse);
         }
         return cache;
     }
@@ -123,7 +108,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
 
     private String createScript(Map<String, String> cache) {
         Map<String,Object> model = new HashMap<>();
-        model.put("module", module);
+        model.put("module", config.getModule());
         model.put("caches", cache.entrySet());
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate("prefill-cache.html.ftl"), model);

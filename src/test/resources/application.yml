@@ -1,0 +1,6 @@
+cache:
+  preload:
+    module: myapp
+    urls:
+      - api/simple-list
+      - api/long-list
