@@ -8,3 +8,6 @@ cache:
       - url: api/steps/{by}
         parameters:
           by: some expression
+
+server:
+  context-path: /test

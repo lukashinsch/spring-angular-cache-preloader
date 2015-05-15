@@ -8,10 +8,12 @@ import javax.servlet.http.HttpServletRequestWrapper;
  */
 public class UrlRewritingRequestWrapper extends HttpServletRequestWrapper {
 
+    private final HttpServletRequest request;
     private String url;
 
     public UrlRewritingRequestWrapper(HttpServletRequest request, String url) {
         super(request);
+        this.request = request;
         this.url = url;
     }
 
@@ -22,8 +24,9 @@ public class UrlRewritingRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public StringBuffer getRequestURL() {
-        // TODO fix
-        return new StringBuffer("http://localhost:8080" + getRequestURI());
+        final StringBuffer originalRequestURL = request.getRequestURL();
+        final String prefix = originalRequestURL.substring(0, originalRequestURL.length() - request.getServletPath().length());
+        return new StringBuffer(prefix + getServletPath());
     }
 
     @Override
