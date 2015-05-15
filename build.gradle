@@ -74,7 +74,7 @@ if (System.getenv('CI') != 'true') {
                 pom.project {
                     name 'spring-angular-cache-preloader'
                     packaging 'jar'
-                    description ''
+                    description 'Component to pre-fill caches for angular js rest request though index page'
                     url 'https://github.com/lukashinsch/spring-angular-cache-preloader/'
 
                     scm {
