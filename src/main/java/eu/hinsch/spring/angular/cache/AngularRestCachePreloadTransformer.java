@@ -25,19 +25,19 @@ import java.util.Map;
  * Created by lukas.hinsch on 08.05.2015.
  */
 @Component
-public class AngularRestCachePrefillTransformer extends ResourceTransformerSupport{
+public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
     private final ApplicationContext applicationContext;
     private final RequestMappingHandlerAdapter requestMappingHandlerAdapter;
-    private AngularRestCachePrefillConfiguration config;
+    private AngularRestCachePreloadConfiguration config;
     private final Configuration freemarkerConfig;
 
     @Autowired
-    public AngularRestCachePrefillTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
-            final ApplicationContext applicationContext,
-            final RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-            final AngularRestCachePrefillConfiguration config) {
+    public AngularRestCachePreloadTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
+                                              final ApplicationContext applicationContext,
+                                              final RequestMappingHandlerAdapter requestMappingHandlerAdapter,
+                                              final AngularRestCachePreloadConfiguration config) {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
         this.applicationContext = applicationContext;
         this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;
@@ -111,7 +111,7 @@ public class AngularRestCachePrefillTransformer extends ResourceTransformerSuppo
         model.put("module", config.getModule());
         model.put("caches", cache.entrySet());
         try {
-            return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate("prefill-cache.html.ftl"), model);
+            return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate("preload-cache.html.ftl"), model);
         } catch (IOException | TemplateException e) {
             throw new RuntimeException("error processing template", e);
         }

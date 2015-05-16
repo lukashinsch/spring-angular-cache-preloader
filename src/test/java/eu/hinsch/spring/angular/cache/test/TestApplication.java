@@ -1,6 +1,6 @@
 package eu.hinsch.spring.angular.cache.test;
 
-import eu.hinsch.spring.angular.cache.AngularRestCachePrefillTransformer;
+import eu.hinsch.spring.angular.cache.AngularRestCachePreloadTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,13 +23,13 @@ import static java.util.stream.Collectors.toList;
 @Controller
 public class TestApplication extends WebMvcConfigurerAdapter {
     @Autowired
-    private AngularRestCachePrefillTransformer angularRestCachePrefillTransformer;
+    private AngularRestCachePreloadTransformer angularRestCachePreloadTransformer;
 
     public static void main(String[] args) {
         SpringApplication.run(TestApplication.class, args);
     }
 
-    @RequestMapping(value = "/api/simple-list" /*, consumes = "application/json", produces = "application/json" */)
+    @RequestMapping(value = "/api/simple-list", consumes = "application/json", produces = "application/json")
     @ResponseBody
     public List<String> simpleList() {
         System.out.println("simpleList");
@@ -49,6 +49,6 @@ public class TestApplication extends WebMvcConfigurerAdapter {
                 .addResourceLocations("classpath:/web/")
                 .setCachePeriod(-1)
                 .resourceChain(false)
-                .addTransformer(angularRestCachePrefillTransformer);
+                .addTransformer(angularRestCachePreloadTransformer);
     }
 }

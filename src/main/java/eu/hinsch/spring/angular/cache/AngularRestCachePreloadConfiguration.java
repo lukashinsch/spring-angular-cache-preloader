@@ -12,7 +12,7 @@ import java.util.Map;
  */
 @Component
 @ConfigurationProperties(prefix = "cache.preload")
-public class AngularRestCachePrefillConfiguration {
+public class AngularRestCachePreloadConfiguration {
 
     private List<String> urls;
 

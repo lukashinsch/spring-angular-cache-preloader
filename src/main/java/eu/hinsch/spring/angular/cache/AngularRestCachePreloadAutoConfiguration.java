@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
  * Created by lh on 14/05/15.
  */
 @Configuration
-@ComponentScan(basePackageClasses = AngularRestCachePrefillAutoConfiguration.class)
-public class AngularRestCachePrefillAutoConfiguration {
+@ComponentScan(basePackageClasses = AngularRestCachePreloadAutoConfiguration.class)
+public class AngularRestCachePreloadAutoConfiguration {
 }
