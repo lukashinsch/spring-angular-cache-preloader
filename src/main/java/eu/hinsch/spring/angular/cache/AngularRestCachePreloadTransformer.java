@@ -31,7 +31,6 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
     private AngularRestCachePreloadConfiguration config;
     private DispatcherServlet dispatcherServlet;
-    private BeanFactory beanFactory;
     private final Configuration freemarkerConfig;
     private final SpelExpressionParser expressionParser;
     private final StandardEvaluationContext evaluationContext;
@@ -42,7 +41,6 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
                                               final BeanFactory beanFactory) {
         this.config = config;
         this.dispatcherServlet = dispatcherServlet;
-        this.beanFactory = beanFactory;
 
         expressionParser = new SpelExpressionParser();
         evaluationContext = new StandardEvaluationContext();
