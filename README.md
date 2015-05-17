@@ -9,7 +9,7 @@ This component can be hooked into a Spring WebMVC application to tunnel REST req
 
 ## Gradle dependency
 ```
-runtime('eu.hinsch:spring-angular-cache-preloader:0.2.0')
+compile('eu.hinsch:spring-angular-cache-preloader:0.2.0')
 ```
 
 ## Maven dependency
@@ -21,7 +21,57 @@ runtime('eu.hinsch:spring-angular-cache-preloader:0.2.0')
 </dependency>
 ```
 
+## Configure resource transformer
+```
+public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
+    @Autowired
+    private AngularRestCachePreloadTransformer angularRestCachePreloadTransformer;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/index.html", "/") // or whatever your welcome page is
+                .addResourceLocations("classpath:/location-of-index/")
+                .resourceChain(false)
+                .addTransformer(angularRestCachePreloadTransformer);
+    }
+}
+```
+
+## Placeholder for generated script
+Add ```{cachePreloadScript}``` in your index.html (right before the </body> end tag), this will be replaced by ```<script>...</script>```
+
+## Turn on caching for request in angular
+For example, if you are using ng-resource then you can turn on caching for a request by
+```
+$resource('some-url', {}, {
+    query : {
+        method : 'GET',
+        cache : true,
+        isArray: true
+    }})
+    .query();
+```
+
+## Configure urls to cache
+In application.yml
+```
+cache-preload:
+  # name of some existing angular module in your app that is being loaded
+  angular-module: myapp
+  
+  cached-urls:
+    # static url to be cached (must be the same as configured in $resource)
+    - url: some-url
+    
+    # dynamic url, where the parameter (likely) to be used is known/can be guessed by server
+    - url: some-dynamic-url/{some-param}
+      parameters:
+        # any SpEL expression (with access to any bean)
+        - some-param: my-expression
+``
+
 ## Example
 
-See [test/java/eu/hinsch/spring/angular/cache/test/TestApplication.java](https://github.com/lukashinsch/spring-angular-cache-preloader/blob/master/src/test/java/eu/hinsch/spring/angular/cache/test/TestApplication.java)
-and [test/resources/application.yml](https://github.com/lukashinsch/spring-angular-cache-preloader/blob/master/src/test/resources/application.yml) for details.
+See [test/java/eu/hinsch/spring/angular/cache/test/TestApplication.java](https://github.com/lukashinsch/spring-angular-cache-preloader/blob/master/src/test/java/eu/hinsch/spring/angular/cache/test/TestApplication.java),
+[test/resources/application.yml](https://github.com/lukashinsch/spring-angular-cache-preloader/blob/master/src/test/resources/application.yml)
+and [test/resources/web/index.html](https://github.com/lukashinsch/spring-angular-cache-preloader/blob/master/src/test/resources/web/index.html) for details.
