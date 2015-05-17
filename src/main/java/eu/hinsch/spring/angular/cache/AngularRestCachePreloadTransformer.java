@@ -71,14 +71,20 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     private Map<String, String> createCache(HttpServletRequest request) {
         Map<String,String> cache = new HashMap<>();
 
-        for (CachedUrl cachedUrl : config.getCachedUrls()) {
-            String url = cachedUrl.getUrl();
-            for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
-                url = url.replace("{" + parameter.getKey() + "}", getParameterValue(parameter.getValue()));
-            }
-            doRequestAndAddToCache(request, cache, url);
-        }
+        config.getCachedUrls()
+                .stream()
+                .map(this::replaceParameters)
+                .forEach(url -> doRequestAndAddToCache(request, cache, url));
+
         return cache;
+    }
+
+    private String replaceParameters(CachedUrl cachedUrl) {
+        String url = cachedUrl.getUrl();
+        for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
+            url = url.replace("{" + parameter.getKey() + "}", getParameterValue(parameter.getValue()));
+        }
+        return url;
     }
 
     private String getParameterValue(String value) {
