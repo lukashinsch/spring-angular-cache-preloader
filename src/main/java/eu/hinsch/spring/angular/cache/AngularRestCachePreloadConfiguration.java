@@ -21,7 +21,7 @@ public class AngularRestCachePreloadConfiguration {
     @NotNull
     private String module;
 
-    private List<ParameterizedUrl> parameterizedUrls;
+    private List<ParametrizedUrl> parametrizedUrls;
 
     public List<String> getUrls() {
         return urls;
@@ -47,15 +47,15 @@ public class AngularRestCachePreloadConfiguration {
         this.module = module;
     }
 
-    public List<ParameterizedUrl> getParameterizedUrls() {
-        return parameterizedUrls;
+    public List<ParametrizedUrl> getParametrizedUrls() {
+        return parametrizedUrls;
     }
 
-    public void setParameterizedUrls(List<ParameterizedUrl> parameterizedUrls) {
-        this.parameterizedUrls = parameterizedUrls;
+    public void setParametrizedUrls(List<ParametrizedUrl> parametrizedUrls) {
+        this.parametrizedUrls = parametrizedUrls;
     }
 
-    public static class ParameterizedUrl {
+    public static class ParametrizedUrl {
         @NotNull
         private String url;
         @NotNull

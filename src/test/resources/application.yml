@@ -4,10 +4,10 @@ cache:
     urls:
       - api/simple-list
       - api/long-list
-    parameterizedUrls:
+    parametrizedUrls:
       - url: api/steps/{by}
         parameters:
-          by: some expression
+          by: 2
 
 server:
   context-path: /test

@@ -1,17 +1,14 @@
 package eu.hinsch.spring.angular.cache;
 
+import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.ParametrizedUrl;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.resource.ResourceTransformerChain;
 import org.springframework.web.servlet.resource.ResourceTransformerSupport;
 import org.springframework.web.servlet.resource.TransformedResource;
@@ -27,21 +24,15 @@ import java.util.Map;
 @Component
 public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
 
-    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
-    private final ApplicationContext applicationContext;
-    private final RequestMappingHandlerAdapter requestMappingHandlerAdapter;
     private AngularRestCachePreloadConfiguration config;
+    private DispatcherServlet dispatcherServlet;
     private final Configuration freemarkerConfig;
 
     @Autowired
-    public AngularRestCachePreloadTransformer(final RequestMappingHandlerMapping requestMappingHandlerMapping,
-                                              final ApplicationContext applicationContext,
-                                              final RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-                                              final AngularRestCachePreloadConfiguration config) {
-        this.requestMappingHandlerMapping = requestMappingHandlerMapping;
-        this.applicationContext = applicationContext;
-        this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;
+    public AngularRestCachePreloadTransformer(final AngularRestCachePreloadConfiguration config,
+                                              final DispatcherServlet dispatcherServlet) {
         this.config = config;
+        this.dispatcherServlet = dispatcherServlet;
 
         freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates");
@@ -67,43 +58,28 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         Map<String,String> cache = new HashMap<>();
 
         for (String url : config.getUrls()) {
-            String controllerResponse = executeControllerMethod(request, url);
-            cache.put(url, controllerResponse);
+            doRequestAndAddToCache(request, cache, url);
+        }
+
+        for (ParametrizedUrl parametrizedUrl : config.getParametrizedUrls()) {
+            String url = parametrizedUrl.getUrl();
+            for (Map.Entry<String, String> parameter : parametrizedUrl.getParameters().entrySet()) {
+                url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
+            }
+            doRequestAndAddToCache(request, cache, url);
         }
         return cache;
     }
 
-    private String executeControllerMethod(HttpServletRequest request, String cachedUrl) {
+    private void doRequestAndAddToCache(HttpServletRequest request, Map<String, String> cache, String url) {
         ContentBufferingResponse response = new ContentBufferingResponse();
-        HandlerMethod controllerHandlerMethod = createControllerHandlerMethod(cachedUrl);
-
         try {
-            requestMappingHandlerAdapter.handle(new UrlRewritingRequestWrapper(request, cachedUrl), response, controllerHandlerMethod);
+            dispatcherServlet.service(new UrlRewritingRequestWrapper(request, url), response);
         } catch (Exception e) {
-            throw new RuntimeException("error caching request " + cachedUrl, e);
+            throw new RuntimeException("error caching request " + url, e);
         }
-        return response.getResponseContent();
-    }
-
-    private HandlerMethod createControllerHandlerMethod(String cachedUrl) {
-        HandlerMethod handlerMethod = getOriginalHandlerMethod(cachedUrl);
-        Object controller = applicationContext.getBean((String) handlerMethod.getBean());
-        return new HandlerMethod(controller, handlerMethod.getMethod());
-    }
-
-    private HandlerMethod getOriginalHandlerMethod(String url) {
-        final Map<RequestMappingInfo, HandlerMethod> handlerMethods = requestMappingHandlerMapping.getHandlerMethods();
-        return handlerMethods
-                .entrySet()
-                .stream()
-                .filter(entry -> entry.getKey()
-                                    .getPatternsCondition()
-                                    .getPatterns()
-                                    .contains(url.startsWith("/") ? url : "/" + url)
-                )
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("no handler method found for " + url))
-                .getValue();
+        String controllerResponse = response.getResponseContent();
+        cache.put(url, controllerResponse);
     }
 
     private String createScript(Map<String, String> cache) {
