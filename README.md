@@ -68,7 +68,7 @@ cache-preload:
       parameters:
         # any SpEL expression (with access to any bean)
         - some-param: my-expression
-``
+```
 
 ## Example
 
