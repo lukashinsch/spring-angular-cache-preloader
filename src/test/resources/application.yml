@@ -5,7 +5,7 @@ cache-preload:
     - url: api/long-list
     - url: api/steps/{by}
       parameters:
-        by: 2
+        by: 2+3
 
 server:
   context-path: /test

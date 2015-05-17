@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class AngularRestCachePreloadConfiguration {
         @NotNull
         private String url;
 
-        private Map<String,String> parameters;
+        private Map<String,String> parameters = new HashMap<>();
 
         public String getUrl() {
             return url;

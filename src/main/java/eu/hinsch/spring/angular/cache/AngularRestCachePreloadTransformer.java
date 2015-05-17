@@ -4,8 +4,13 @@ import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.Cache
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.io.Resource;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -26,13 +31,22 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
     private AngularRestCachePreloadConfiguration config;
     private DispatcherServlet dispatcherServlet;
+    private BeanFactory beanFactory;
     private final Configuration freemarkerConfig;
+    private final SpelExpressionParser expressionParser;
+    private final StandardEvaluationContext evaluationContext;
 
     @Autowired
     public AngularRestCachePreloadTransformer(final AngularRestCachePreloadConfiguration config,
-                                              final DispatcherServlet dispatcherServlet) {
+                                              final DispatcherServlet dispatcherServlet,
+                                              final BeanFactory beanFactory) {
         this.config = config;
         this.dispatcherServlet = dispatcherServlet;
+        this.beanFactory = beanFactory;
+
+        expressionParser = new SpelExpressionParser();
+        evaluationContext = new StandardEvaluationContext();
+        evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
 
         freemarkerConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
         freemarkerConfig.setClassForTemplateLoading(this.getClass(), "/templates");
@@ -59,14 +73,17 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
         for (CachedUrl cachedUrl : config.getCachedUrls()) {
             String url = cachedUrl.getUrl();
-            if (cachedUrl.getParameters() != null) {
-                for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
-                    url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
-                }
+            for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
+                url = url.replace("{" + parameter.getKey() + "}", getParameterValue(parameter.getValue()));
             }
             doRequestAndAddToCache(request, cache, url);
         }
         return cache;
+    }
+
+    private String getParameterValue(String value) {
+        Expression expression = expressionParser.parseExpression(value);
+        return String.valueOf(expression.getValue(evaluationContext));
     }
 
     private void doRequestAndAddToCache(HttpServletRequest request, Map<String, String> cache, String url) {
