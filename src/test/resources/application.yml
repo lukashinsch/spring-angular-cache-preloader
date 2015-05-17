@@ -1,13 +1,11 @@
-cache:
-  preload:
-    module: myapp
-    urls:
-      - api/simple-list
-      - api/long-list
-    parametrizedUrls:
-      - url: api/steps/{by}
-        parameters:
-          by: 2
+cache-preload:
+  angular-module: myapp
+  cached-urls:
+    - url: api/simple-list
+    - url: api/long-list
+    - url: api/steps/{by}
+      parameters:
+        by: 2
 
 server:
   context-path: /test

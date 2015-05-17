@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
 
@@ -11,25 +12,16 @@ import java.util.Map;
  * Created by lh on 14/05/15.
  */
 @Component
-@ConfigurationProperties(prefix = "cache.preload")
+@ConfigurationProperties(prefix = "cache-preload")
 public class AngularRestCachePreloadConfiguration {
-
-    private List<String> urls;
 
     private String placeholder = "{cachePreloadScript}";
 
     @NotNull
-    private String module;
+    private String angularModule;
 
-    private List<ParametrizedUrl> parametrizedUrls;
-
-    public List<String> getUrls() {
-        return urls;
-    }
-
-    public void setUrls(List<String> urls) {
-        this.urls = urls;
-    }
+    @Size(min = 1)
+    private List<CachedUrl> cachedUrls;
 
     public String getPlaceholder() {
         return placeholder;
@@ -39,26 +31,26 @@ public class AngularRestCachePreloadConfiguration {
         this.placeholder = placeholder;
     }
 
-    public String getModule() {
-        return module;
+    public String getAngularModule() {
+        return angularModule;
     }
 
-    public void setModule(String module) {
-        this.module = module;
+    public void setAngularModule(String angularModule) {
+        this.angularModule = angularModule;
     }
 
-    public List<ParametrizedUrl> getParametrizedUrls() {
-        return parametrizedUrls;
+    public List<CachedUrl> getCachedUrls() {
+        return cachedUrls;
     }
 
-    public void setParametrizedUrls(List<ParametrizedUrl> parametrizedUrls) {
-        this.parametrizedUrls = parametrizedUrls;
+    public void setCachedUrls(List<CachedUrl> cachedUrls) {
+        this.cachedUrls = cachedUrls;
     }
 
-    public static class ParametrizedUrl {
+    public static class CachedUrl {
         @NotNull
         private String url;
-        @NotNull
+
         private Map<String,String> parameters;
 
         public String getUrl() {

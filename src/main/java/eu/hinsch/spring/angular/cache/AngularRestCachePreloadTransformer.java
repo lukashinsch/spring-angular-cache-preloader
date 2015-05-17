@@ -1,6 +1,6 @@
 package eu.hinsch.spring.angular.cache;
 
-import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.ParametrizedUrl;
+import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.CachedUrl;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
@@ -57,14 +57,12 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     private Map<String, String> createCache(HttpServletRequest request) {
         Map<String,String> cache = new HashMap<>();
 
-        for (String url : config.getUrls()) {
-            doRequestAndAddToCache(request, cache, url);
-        }
-
-        for (ParametrizedUrl parametrizedUrl : config.getParametrizedUrls()) {
-            String url = parametrizedUrl.getUrl();
-            for (Map.Entry<String, String> parameter : parametrizedUrl.getParameters().entrySet()) {
-                url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
+        for (CachedUrl cachedUrl : config.getCachedUrls()) {
+            String url = cachedUrl.getUrl();
+            if (cachedUrl.getParameters() != null) {
+                for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
+                    url = url.replace("{" + parameter.getKey() + "}", parameter.getValue());
+                }
             }
             doRequestAndAddToCache(request, cache, url);
         }
@@ -84,7 +82,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
     private String createScript(Map<String, String> cache) {
         Map<String,Object> model = new HashMap<>();
-        model.put("module", config.getModule());
+        model.put("module", config.getAngularModule());
         model.put("caches", cache.entrySet());
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfig.getTemplate("preload-cache.html.ftl"), model);
