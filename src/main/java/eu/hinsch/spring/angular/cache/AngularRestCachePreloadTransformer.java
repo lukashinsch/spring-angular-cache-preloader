@@ -31,8 +31,8 @@ import java.util.Map;
 @Component
 public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
 
-    private AngularRestCachePreloadConfiguration config;
-    private DispatcherServlet dispatcherServlet;
+    private final AngularRestCachePreloadConfiguration config;
+    private final DispatcherServlet dispatcherServlet;
     private final Configuration freemarkerConfig;
     private final SpelExpressionParser expressionParser;
     private final StandardEvaluationContext evaluationContext;
@@ -68,7 +68,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         return new TransformedResource(transformedResource, content.getBytes("UTF-8"));
     }
 
-    private Map<String, String> createCache(HttpServletRequest request) {
+    private Map<String, String> createCache(final HttpServletRequest request) {
         Map<String,String> cache = new HashMap<>();
 
         config.getCachedUrls()
@@ -79,7 +79,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         return cache;
     }
 
-    private String replaceParameters(CachedUrl cachedUrl) {
+    private String replaceParameters(final CachedUrl cachedUrl) {
         String url = cachedUrl.getUrl();
         for (Map.Entry<String, String> parameter : cachedUrl.getParameters().entrySet()) {
             url = url.replace("{" + parameter.getKey() + "}", getParameterValue(parameter.getValue()));
@@ -87,12 +87,12 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         return url;
     }
 
-    private String getParameterValue(String value) {
+    private String getParameterValue(final String value) {
         Expression expression = expressionParser.parseExpression(value);
         return String.valueOf(expression.getValue(evaluationContext));
     }
 
-    private void doRequestAndAddToCache(HttpServletRequest request, Map<String, String> cache, String url) {
+    private void doRequestAndAddToCache(final HttpServletRequest request, final Map<String, String> cache, final String url) {
         ContentBufferingResponse response = new ContentBufferingResponse();
         try {
             dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
@@ -103,11 +103,11 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         cache.put(url, controllerResponse);
     }
 
-    private String urlDecode(String url) throws UnsupportedEncodingException {
+    private String urlDecode(final String url) throws UnsupportedEncodingException {
         return URLDecoder.decode(url, "UTF-8");
     }
 
-    private String createScript(Map<String, String> cache) {
+    private String createScript(final Map<String, String> cache) {
         Map<String,Object> model = new HashMap<>();
         model.put("module", config.getAngularModule());
         model.put("caches", cache.entrySet());
