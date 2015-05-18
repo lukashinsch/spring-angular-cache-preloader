@@ -67,7 +67,7 @@ cache-preload:
     - url: some-dynamic-url/{some-param}
       parameters:
         # any SpEL expression (with access to any bean)
-        - some-param: my-expression
+        some-param: my-expression
 ```
 
 ## Example
