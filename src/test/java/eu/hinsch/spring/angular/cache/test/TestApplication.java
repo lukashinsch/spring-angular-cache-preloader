@@ -50,6 +50,12 @@ public class TestApplication extends WebMvcConfigurerAdapter {
         return IntStream.range(0, 10).map(i -> i * by).mapToObj(String::valueOf).collect(toList());
     }
 
+    @RequestMapping("/api/split/{argument}")
+    @ResponseBody
+    public String[] split(@PathVariable String argument) {
+        return argument.split("\\|");
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/index.html", "/")

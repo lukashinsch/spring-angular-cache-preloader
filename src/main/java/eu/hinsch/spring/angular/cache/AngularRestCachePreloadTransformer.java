@@ -20,6 +20,8 @@ import org.springframework.web.servlet.resource.TransformedResource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,12 +95,16 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     private void doRequestAndAddToCache(HttpServletRequest request, Map<String, String> cache, String url) {
         ContentBufferingResponse response = new ContentBufferingResponse();
         try {
-            dispatcherServlet.service(new UrlRewritingRequestWrapper(request, url), response);
+            dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
         } catch (Exception e) {
             throw new RuntimeException("error caching request " + url, e);
         }
         String controllerResponse = response.getResponseContent();
         cache.put(url, controllerResponse);
+    }
+
+    private String urlDecode(String url) throws UnsupportedEncodingException {
+        return URLDecoder.decode(url, "UTF-8");
     }
 
     private String createScript(Map<String, String> cache) {
