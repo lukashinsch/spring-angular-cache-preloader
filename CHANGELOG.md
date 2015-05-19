@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.2
+- Url en/decoding now works both ways
+
 ## 0.2.1
 - Handle url encoding
 

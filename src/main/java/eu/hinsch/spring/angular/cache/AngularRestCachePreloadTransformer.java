@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import java.util.Map;
  */
 @Component
 public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
+
+    private static final String DEFAULT_ENCODING = "UTF-8";
 
     private final AngularRestCachePreloadConfiguration config;
     private final DispatcherServlet dispatcherServlet;
@@ -65,7 +68,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         String script = createScript(cache);
         content = content.replace(config.getPlaceholder(), script);
 
-        return new TransformedResource(transformedResource, content.getBytes("UTF-8"));
+        return new TransformedResource(transformedResource, content.getBytes(DEFAULT_ENCODING));
     }
 
     private Map<String, String> createCache(final HttpServletRequest request) {
@@ -89,22 +92,27 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
     private String getParameterValue(final String value) {
         Expression expression = expressionParser.parseExpression(value);
-        return String.valueOf(expression.getValue(evaluationContext));
+        final String result = String.valueOf(expression.getValue(evaluationContext));
+        try {
+            return URLEncoder.encode(result, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("Encoding error", e);
+        }
     }
 
     private void doRequestAndAddToCache(final HttpServletRequest request, final Map<String, String> cache, final String url) {
         ContentBufferingResponse response = new ContentBufferingResponse();
         try {
             dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
+            String controllerResponse = response.getResponseContent();
+            cache.put(url, controllerResponse);
         } catch (Exception e) {
             throw new RuntimeException("error caching request " + url, e);
         }
-        String controllerResponse = response.getResponseContent();
-        cache.put(url, controllerResponse);
     }
 
     private String urlDecode(final String url) throws UnsupportedEncodingException {
-        return URLDecoder.decode(url, "UTF-8");
+        return URLDecoder.decode(url, DEFAULT_ENCODING);
     }
 
     private String createScript(final Map<String, String> cache) {

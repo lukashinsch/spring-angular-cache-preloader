@@ -13,6 +13,7 @@ import java.util.Locale;
 /**
  * Created by lh on 09/05/15.
  */
+@SuppressWarnings("deprecation")
 public class ContentBufferingResponse implements HttpServletResponse {
 
     private final ByteArrayServletOutputStream outputStream = new ByteArrayServletOutputStream();

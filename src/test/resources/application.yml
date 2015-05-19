@@ -13,7 +13,10 @@ cache-preload:
         argument: "'two|words'"
     - url: api/split/{argument}
       parameters:
-        argument: "'even%7Cmore%7Cwords'"
+        argument: "'even|more|words'"
+    - url: api/split/{argument}
+      parameters:
+        argument: "'with spaces'"
 
 server:
   context-path: /test
