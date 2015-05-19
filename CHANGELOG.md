@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.3
+- No longer ignore errors during request execution (closes [#5](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/5))
+
 ## 0.2.2
 - Url en/decoding now works both ways
 
