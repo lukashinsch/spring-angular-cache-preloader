@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -105,9 +106,19 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         try {
             dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
             String controllerResponse = response.getResponseContent();
+            verifyNoErrorResponse(response.getStatus(), url);
             cache.put(url, controllerResponse);
         } catch (Exception e) {
             throw new RuntimeException("error caching request " + url, e);
+        }
+    }
+
+    private void verifyNoErrorResponse(int responseStatus, String url) {
+        if (responseStatus > 0) {
+            HttpStatus httpStatus = HttpStatus.valueOf(responseStatus);
+            if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()){
+                throw new RuntimeException("Error caching request " + url + ", response status was " + responseStatus);
+            }
         }
     }
 

@@ -4,6 +4,8 @@ import eu.hinsch.spring.angular.cache.AngularRestCachePreloadTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +56,11 @@ public class TestApplication extends WebMvcConfigurerAdapter {
     @ResponseBody
     public String[] split(@PathVariable String argument) {
         return argument.split("\\|");
+    }
+
+    @RequestMapping("/api/status/{status}")
+    public ResponseEntity<Integer> error(@PathVariable int status) {
+        return new ResponseEntity<>(status, HttpStatus.valueOf(status));
     }
 
     @Override

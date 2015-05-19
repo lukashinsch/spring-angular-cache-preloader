@@ -17,6 +17,15 @@ cache-preload:
     - url: api/split/{argument}
       parameters:
         argument: "'with spaces'"
+#    - url: /api/status/{status}
+#      parameters:
+#        status: 500
+#    - url: /api/status/{status}
+#      parameters:
+#        status: 404
+    - url: /api/status/{status}
+      parameters:
+        status: 200
 
 server:
   context-path: /test

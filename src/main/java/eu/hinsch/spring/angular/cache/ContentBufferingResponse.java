@@ -17,6 +17,7 @@ import java.util.Locale;
 public class ContentBufferingResponse implements HttpServletResponse {
 
     private final ByteArrayServletOutputStream outputStream = new ByteArrayServletOutputStream();
+    private int sc;
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
@@ -25,6 +26,21 @@ public class ContentBufferingResponse implements HttpServletResponse {
 
     public String getResponseContent() {
         return new String(outputStream.toByteArray());
+    }
+
+    @Override
+    public void setStatus(int sc) {
+        this.sc = sc;
+    }
+
+    @Override
+    public void setStatus(int sc, String sm) {
+        this.sc = sc;
+    }
+
+    @Override
+    public int getStatus() {
+        return sc;
     }
 
 
@@ -84,17 +100,6 @@ public class ContentBufferingResponse implements HttpServletResponse {
 
     @Override
     public void addIntHeader(String name, int value) {}
-
-    @Override
-    public void setStatus(int sc) {}
-
-    @Override
-    public void setStatus(int sc, String sm) {}
-
-    @Override
-    public int getStatus() {
-        return 0;
-    }
 
     @Override
     public String getHeader(String name) {
