@@ -59,6 +59,9 @@ cache-preload:
   # name of some existing angular module in your app that is being loaded
   angular-module: myapp
   
+  # token in static resource to replace with script, defaults to {cachePreloadScript}
+  placeholder: 'mytoken'
+  
   cached-urls:
     # static url to be cached (must be the same as configured in $resource)
     - url: some-url
