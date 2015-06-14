@@ -1,6 +1,7 @@
 package eu.hinsch.spring.angular.cache;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
@@ -16,8 +17,15 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "cache-preload")
 public class AngularRestCachePreloadConfiguration {
 
+    /**
+     * placeholder used to inject script into index.html
+     */
     private String placeholder = "{cachePreloadScript}";
 
+    /**
+     * name of an angular module that is being loaded by the main application.
+     * Needed to access angular $cacheFactory
+     */
     @NotNull
     private String angularModule;
 
@@ -49,6 +57,19 @@ public class AngularRestCachePreloadConfiguration {
     }
 
     public static class CachedUrl {
+
+        public CachedUrl() {
+        }
+
+        public CachedUrl(final String url, Map<String,String> parameters) {
+            this.url = url;
+            this.parameters = parameters;
+        }
+
+        public CachedUrl(String url) {
+            this.url = url;
+        }
+
         @NotNull
         private String url;
 
