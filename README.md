@@ -4,6 +4,8 @@
 
 
 # spring-angular-cache-preloader
+
+[![Join the chat at https://gitter.im/lukashinsch/spring-angular-cache-preloader](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lukashinsch/spring-angular-cache-preloader?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Component to pre-fill caches for angular js rest request though index page
 
 # Overview
