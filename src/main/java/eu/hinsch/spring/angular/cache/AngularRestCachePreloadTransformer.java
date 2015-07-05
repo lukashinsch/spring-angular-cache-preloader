@@ -105,12 +105,12 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         ContentBufferingResponse response = new ContentBufferingResponse();
         try {
             dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
-            String controllerResponse = response.getResponseContent();
-            verifyNoErrorResponse(response.getStatus(), url);
-            cache.put(url, controllerResponse);
         } catch (Exception e) {
             throw new RuntimeException("error caching request " + url, e);
         }
+        String controllerResponse = response.getResponseContent();
+        verifyNoErrorResponse(response.getStatus(), url);
+        cache.put(url, controllerResponse);
     }
 
     private void verifyNoErrorResponse(int responseStatus, String url) {
