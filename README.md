@@ -1,3 +1,8 @@
+[![Coverage Status](https://coveralls.io/repos/lukashinsch/spring-angular-cache-preloader/badge.svg?branch=master)](https://coveralls.io/r/lukashinsch/spring-angular-cache-preloader?branch=master)
+[![Build Status](https://travis-ci.org/lukashinsch/spring-angular-cache-preloader.svg?branch=master)](https://travis-ci.org/lukashinsch/spring-angular-cache-preloader)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/eu.hinsch/spring-angular-cache-preloader/badge.svg)](https://maven-badges.herokuapp.com/maven-central/eu.hinsch/spring-angular-cache-preloader/)
+
+
 # spring-angular-cache-preloader
 Component to pre-fill caches for angular js rest request though index page
 
