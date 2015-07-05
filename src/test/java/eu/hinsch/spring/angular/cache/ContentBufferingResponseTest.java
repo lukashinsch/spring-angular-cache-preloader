@@ -50,6 +50,7 @@ public class ContentBufferingResponseTest {
         response.encodeUrl(null);
         response.encodeRedirectURL(null);
         response.encodeUrl(null);
+        response.encodeURL(null);
         response.encodeRedirectUrl(null);
         response.sendError(0, null);
         response.sendError(0);
