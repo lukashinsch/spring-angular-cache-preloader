@@ -3,8 +3,9 @@ package eu.hinsch.spring.angular.cache;
 import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.CachedUrl;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -20,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
@@ -33,6 +36,9 @@ import static org.mockito.Mockito.*;
 public class AngularRestCachePreloadTransformerTest {
 
     private static final String REST_RESPONSE = "['A', 'B']";
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private AngularRestCachePreloadConfiguration config;
@@ -51,34 +57,70 @@ public class AngularRestCachePreloadTransformerTest {
     private AngularRestCachePreloadTransformer transformer;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void shouldAddRestResponseToAngularCache() throws IOException, ServletException {
-        // given
         when(chain.transform(request, resource)).thenReturn(resource);
-        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
         when(config.getAngularModule()).thenReturn("myModule");
         when(config.getPlaceholder()).thenReturn("{cachePreloadScript}");
         when(resource.getInputStream()).thenReturn(new ByteArrayInputStream("--{cachePreloadScript}--".getBytes()));
-        doAnswer(invocation -> {
-            ServletResponse response = (ServletResponse) invocation.getArguments()[1];
-            response.getOutputStream().write(REST_RESPONSE.getBytes());
-            return null;
-        }).when(dispatcherServlet).service(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+    @Test
+    public void shouldAddRestResponseToAngularCache() throws Exception {
+        // given
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
+        mockResponse(REST_RESPONSE, 200);
 
         // when
         Resource transformedResource = transformer.transform(request, resource, chain);
 
         // then
-        ArgumentCaptor<HttpServletResponse> responseCaptor = ArgumentCaptor.forClass(HttpServletResponse.class);
-        ArgumentCaptor<HttpServletRequest> requestCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
-        verify(dispatcherServlet).service(requestCaptor.capture(), responseCaptor.capture());
-
-        String content = IOUtils.toString(transformedResource.getInputStream());
+        String content = getContent(transformedResource);
         assertThat(content, containsString("httpCache.put('/test/url', '" + REST_RESPONSE + "');"));
+    }
+
+    @Test
+    public void shouldHandleDynamicParameters() throws Exception {
+        // given
+        Map<String,String> parameters = new HashMap<>();
+        parameters.put("parameter", "1 + 1");
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url/{parameter}", parameters)));
+        mockResponse(REST_RESPONSE, 200);
+
+        // when
+        Resource transformedResource = transformer.transform(request, resource, chain);
+
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, containsString("httpCache.put('/test/url/2', '" + REST_RESPONSE + "');"));
+    }
+
+    @Test
+    public void shouldThrowExceptionOnErrorResponse() throws Exception {
+        // given
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
+        mockResponse("", 400);
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Error caching request /test/url, response status was 400");
+
+        // when
+        transformer.transform(request, resource, chain);
+
+        // then -> exception
+    }
+
+    private void mockResponse(String restResponse, int status) throws ServletException, IOException {
+        doAnswer(invocation -> {
+            HttpServletResponse response = (HttpServletResponse) invocation.getArguments()[1];
+            response.getOutputStream().write(restResponse.getBytes());
+            response.setStatus(status);
+            return null;
+        }).when(dispatcherServlet).service(any(ServletRequest.class), any(ServletResponse.class));
+    }
+
+
+    private String getContent(Resource transformedResource) throws IOException {
+        return IOUtils.toString(transformedResource.getInputStream());
     }
 
 
