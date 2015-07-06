@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.expression.Expression;
@@ -43,7 +44,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
     @Autowired
     public AngularRestCachePreloadTransformer(final AngularRestCachePreloadConfiguration config,
-                                              final DispatcherServlet dispatcherServlet,
+                                              final @Lazy DispatcherServlet dispatcherServlet,
                                               final BeanFactory beanFactory) {
         this.config = config;
         this.dispatcherServlet = dispatcherServlet;
