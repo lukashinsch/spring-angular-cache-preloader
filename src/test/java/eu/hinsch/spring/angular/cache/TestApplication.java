@@ -1,6 +1,5 @@
-package eu.hinsch.spring.angular.cache.test;
+package eu.hinsch.spring.angular.cache;
 
-import eu.hinsch.spring.angular.cache.AngularRestCachePreloadTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
