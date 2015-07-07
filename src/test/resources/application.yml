@@ -1,5 +1,6 @@
 cache-preload:
   angular-module: myapp
+  placeholder: '{customPlaceholder}'
   cached-urls:
     - url: api/simple-list
     - url: api/long-list
