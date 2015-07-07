@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -102,6 +103,22 @@ public class AngularRestCachePreloadTransformerTest {
         mockResponse("", 400);
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Error caching request /test/url, response status was 400");
+
+        // when
+        transformer.transform(request, resource, chain);
+
+        // then -> exception
+    }
+
+    @Test
+    public void shouldWrapExceptionThrownByDispatchServlet() throws Exception {
+        // given
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
+        doThrow(new IllegalArgumentException("my exception"))
+                .when(dispatcherServlet).service(any(ServletRequest.class), any(ServletResponse.class));
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("error caching request /test/url");
+        expectedException.expectCause(instanceOf(IllegalArgumentException.class));
 
         // when
         transformer.transform(request, resource, chain);
