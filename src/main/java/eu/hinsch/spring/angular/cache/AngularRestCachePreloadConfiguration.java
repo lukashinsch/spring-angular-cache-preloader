@@ -58,6 +58,11 @@ public class AngularRestCachePreloadConfiguration {
 
     public static class CachedUrl {
 
+        @NotNull
+        private String url;
+        private Map<String,String> parameters = new HashMap<>();
+        private String cachingEnabled;
+
         public CachedUrl() {
         }
 
@@ -70,11 +75,6 @@ public class AngularRestCachePreloadConfiguration {
             this.url = url;
         }
 
-        @NotNull
-        private String url;
-
-        private Map<String,String> parameters = new HashMap<>();
-
         public String getUrl() {
             return url;
         }
@@ -85,6 +85,14 @@ public class AngularRestCachePreloadConfiguration {
 
         public Map<String, String> getParameters() {
             return parameters;
+        }
+
+        public String getCachingEnabled() {
+            return cachingEnabled;
+        }
+
+        public void setCachingEnabled(String cachingEnabled) {
+            this.cachingEnabled = cachingEnabled;
         }
     }
 }

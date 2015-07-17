@@ -15,6 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.resource.ResourceTransformerChain;
 import org.springframework.web.servlet.resource.ResourceTransformerSupport;
@@ -78,10 +79,20 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
 
         config.getCachedUrls()
                 .stream()
+                .filter(this::isEnabled)
                 .map(this::replaceParameters)
                 .forEach(url -> doRequestAndAddToCache(request, cache, url));
 
         return cache;
+    }
+
+    private boolean isEnabled(CachedUrl cachedUrl) {
+        final String cachingEnabled = cachedUrl.getCachingEnabled();
+        if (StringUtils.hasText(cachingEnabled)) {
+            final Expression expression = expressionParser.parseExpression(cachingEnabled);
+            return Boolean.TRUE.equals(expression.getValue(evaluationContext));
+        }
+        return true;
     }
 
     private String replaceParameters(final CachedUrl cachedUrl) {
