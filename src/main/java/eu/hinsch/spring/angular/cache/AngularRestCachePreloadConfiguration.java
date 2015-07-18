@@ -1,7 +1,6 @@
 package eu.hinsch.spring.angular.cache;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
@@ -58,6 +57,11 @@ public class AngularRestCachePreloadConfiguration {
 
     public static class CachedUrl {
 
+        @NotNull
+        private String url;
+        private Map<String,String> parameters = new HashMap<>();
+        private String enabled;
+
         public CachedUrl() {
         }
 
@@ -70,11 +74,6 @@ public class AngularRestCachePreloadConfiguration {
             this.url = url;
         }
 
-        @NotNull
-        private String url;
-
-        private Map<String,String> parameters = new HashMap<>();
-
         public String getUrl() {
             return url;
         }
@@ -85,6 +84,14 @@ public class AngularRestCachePreloadConfiguration {
 
         public Map<String, String> getParameters() {
             return parameters;
+        }
+
+        public String getEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(String enabled) {
+            this.enabled = enabled;
         }
     }
 }
