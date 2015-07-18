@@ -70,6 +70,8 @@ cache-preload:
   cached-urls:
     # static url to be cached (must be the same as configured in $resource)
     - url: some-url
+      # only cache if expression evaluates to true
+      enabled: my-expression
     
     # dynamic url, where the parameter (likely) to be used is known/can be guessed by server
     - url: some-dynamic-url/{some-param}

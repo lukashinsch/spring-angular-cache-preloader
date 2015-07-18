@@ -27,6 +27,7 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -94,6 +95,36 @@ public class AngularRestCachePreloadTransformerTest {
         // then
         String content = getContent(transformedResource);
         assertThat(content, containsString("httpCache.put('/test/url/2', '" + REST_RESPONSE + "');"));
+    }
+
+    @Test
+    public void shouldNotCacheWhenConditionalExpressionEvaluatesFalse() throws Exception {
+        CachedUrl cachedUrl = new CachedUrl("/test/url");
+        cachedUrl.setEnabled("false");
+        when(config.getCachedUrls()).thenReturn(singletonList(cachedUrl));
+        mockResponse(REST_RESPONSE, 200);
+
+        // when
+        Resource transformedResource = transformer.transform(request, resource, chain);
+
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, not(containsString("httpCache.put('/test/url', '" + REST_RESPONSE + "');")));
+    }
+
+    @Test
+    public void shouldCacheWhenConditionalExpressionEvaluatesTrue() throws Exception {
+        CachedUrl cachedUrl = new CachedUrl("/test/url");
+        cachedUrl.setEnabled("true");
+        when(config.getCachedUrls()).thenReturn(singletonList(cachedUrl));
+        mockResponse(REST_RESPONSE, 200);
+
+        // when
+        Resource transformedResource = transformer.transform(request, resource, chain);
+
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, containsString("httpCache.put('/test/url', '" + REST_RESPONSE + "');"));
     }
 
     @Test

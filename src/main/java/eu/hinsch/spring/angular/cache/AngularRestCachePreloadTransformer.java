@@ -87,9 +87,9 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     }
 
     private boolean isEnabled(CachedUrl cachedUrl) {
-        final String cachingEnabled = cachedUrl.getCachingEnabled();
-        if (StringUtils.hasText(cachingEnabled)) {
-            final Expression expression = expressionParser.parseExpression(cachingEnabled);
+        final String enabled = cachedUrl.getEnabled();
+        if (StringUtils.hasText(enabled)) {
+            final Expression expression = expressionParser.parseExpression(enabled);
             return Boolean.TRUE.equals(expression.getValue(evaluationContext));
         }
         return true;
