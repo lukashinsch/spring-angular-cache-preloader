@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +65,7 @@ public class AngularRestCachePreloadTransformerTest {
         when(chain.transform(request, resource)).thenReturn(resource);
         when(config.getAngularModule()).thenReturn("myModule");
         when(config.getPlaceholder()).thenReturn("{cachePreloadScript}");
+        when(config.getEncoding()).thenReturn("UTF-8");
         when(resource.getInputStream()).thenReturn(new ByteArrayInputStream("--{cachePreloadScript}--".getBytes()));
     }
 
@@ -128,12 +130,26 @@ public class AngularRestCachePreloadTransformerTest {
     }
 
     @Test
-    public void shouldThrowExceptionOnErrorResponse() throws Exception {
+    public void shouldThrowExceptionOnClientErrorResponse() throws Exception {
         // given
         when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
         mockResponse("", 400);
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Error caching request /test/url, response status was 400");
+
+        // when
+        transformer.transform(request, resource, chain);
+
+        // then -> exception
+    }
+
+    @Test
+    public void shouldThrowExceptionOnServerErrorResponse() throws Exception {
+        // given
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
+        mockResponse("", 500);
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Error caching request /test/url, response status was 500");
 
         // when
         transformer.transform(request, resource, chain);
@@ -155,6 +171,23 @@ public class AngularRestCachePreloadTransformerTest {
         transformer.transform(request, resource, chain);
 
         // then -> exception
+    }
+
+    @Test
+    public void shouldThrowExceptionOnUnsupportedEncoding() throws Exception {
+        // given
+        Map<String,String> parameters = new HashMap<>();
+        parameters.put("parameter", "1 + 1");
+        when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url/{parameter}", parameters)));
+        mockResponse(REST_RESPONSE, 200);
+        when(config.getEncoding()).thenReturn("INVALID-ENCODING");
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectCause(instanceOf(UnsupportedEncodingException.class));
+        expectedException.expectMessage("Encoding error");
+
+        // when
+        transformer.transform(request, resource, chain);
     }
 
     private void mockResponse(String restResponse, int status) throws ServletException, IOException {

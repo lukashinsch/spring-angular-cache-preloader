@@ -35,8 +35,6 @@ import java.util.Map;
 @Component
 public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
 
-    private static final String DEFAULT_ENCODING = "UTF-8";
-
     private final AngularRestCachePreloadConfiguration config;
     private final DispatcherServlet dispatcherServlet;
     private final Configuration freemarkerConfig;
@@ -71,7 +69,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         String script = createScript(cache);
         content = content.replace(config.getPlaceholder(), script);
 
-        return new TransformedResource(transformedResource, content.getBytes(DEFAULT_ENCODING));
+        return new TransformedResource(transformedResource, content.getBytes(config.getEncoding()));
     }
 
     private Map<String, String> createCache(final HttpServletRequest request) {
@@ -107,7 +105,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         Expression expression = expressionParser.parseExpression(value);
         final String result = String.valueOf(expression.getValue(evaluationContext));
         try {
-            return URLEncoder.encode(result, DEFAULT_ENCODING);
+            return URLEncoder.encode(result, config.getEncoding());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Encoding error", e);
         }
@@ -135,7 +133,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     }
 
     private String urlDecode(final String url) throws UnsupportedEncodingException {
-        return URLDecoder.decode(url, DEFAULT_ENCODING);
+        return URLDecoder.decode(url, config.getEncoding());
     }
 
     private String createScript(final Map<String, String> cache) {

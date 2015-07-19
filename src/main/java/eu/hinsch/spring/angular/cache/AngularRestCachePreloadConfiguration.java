@@ -1,5 +1,6 @@
 package eu.hinsch.spring.angular.cache;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,14 @@ public class AngularRestCachePreloadConfiguration {
      * name of an angular module that is being loaded by the main application.
      * Needed to access angular $cacheFactory
      */
-    @NotNull
+    @NotEmpty
     private String angularModule;
 
     @Size(min = 1)
     private List<CachedUrl> cachedUrls;
+
+    @NotEmpty
+    private String encoding = "UTF-8";
 
     public String getPlaceholder() {
         return placeholder;
@@ -53,6 +57,14 @@ public class AngularRestCachePreloadConfiguration {
 
     public void setCachedUrls(List<CachedUrl> cachedUrls) {
         this.cachedUrls = cachedUrls;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 
     public static class CachedUrl {
