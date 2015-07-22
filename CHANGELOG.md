@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.5
+- Don't throw exception on error but log and cache nothing (closes [#18](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/18))
+
 ## 0.2.4
 - Conditional caching based on per url expression
 
