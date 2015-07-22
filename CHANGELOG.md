@@ -3,6 +3,7 @@
 ## 0.2.5
 - Do not throw exception on error but log and cache nothing (closes [#18](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/18))
 - Do not include script when all cached urls are disabled (closes [#14](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/14))
+- Remove dependency on angular-resource (closes gh-17)
 
 ## 0.2.4
 - Conditional caching based on per url expression
