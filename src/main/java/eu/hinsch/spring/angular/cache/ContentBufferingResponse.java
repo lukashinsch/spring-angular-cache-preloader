@@ -43,6 +43,15 @@ public class ContentBufferingResponse implements HttpServletResponse {
         return sc;
     }
 
+    @Override
+    public void sendError(int sc, String msg) throws IOException {
+        this.sc = sc;
+    }
+
+    @Override
+    public void sendError(int sc) throws IOException {
+        this.sc = sc;
+    }
 
     // empty methods below
 
@@ -73,12 +82,6 @@ public class ContentBufferingResponse implements HttpServletResponse {
     public String encodeRedirectUrl(String url) {
         return null;
     }
-
-    @Override
-    public void sendError(int sc, String msg) throws IOException {}
-
-    @Override
-    public void sendError(int sc) throws IOException {}
 
     @Override
     public void sendRedirect(String location) throws IOException {}

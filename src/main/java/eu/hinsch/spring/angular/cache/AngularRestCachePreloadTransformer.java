@@ -4,6 +4,8 @@ import eu.hinsch.spring.angular.cache.AngularRestCachePreloadConfiguration.Cache
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -34,6 +36,8 @@ import java.util.Map;
  */
 @Component
 public class AngularRestCachePreloadTransformer extends ResourceTransformerSupport{
+
+    private static final Logger logger = LoggerFactory.getLogger(AngularRestCachePreloadTransformer.class);
 
     private final AngularRestCachePreloadConfiguration config;
     private final DispatcherServlet dispatcherServlet;
@@ -116,20 +120,25 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         try {
             dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
         } catch (Exception e) {
-            throw new RuntimeException("error caching request " + url, e);
+            logger.warn("error caching request " + url, e);
+            return;
         }
         String controllerResponse = response.getResponseContent();
-        verifyNoErrorResponse(response.getStatus(), url);
+        if (isErrorResponse(response.getStatus(), url)) {
+            return;
+        }
         cache.put(url, controllerResponse);
     }
 
-    private void verifyNoErrorResponse(int responseStatus, String url) {
+    private boolean isErrorResponse(int responseStatus, String url) {
         if (responseStatus > 0) {
             HttpStatus httpStatus = HttpStatus.valueOf(responseStatus);
             if (httpStatus.is4xxClientError() || httpStatus.is5xxServerError()){
-                throw new RuntimeException("Error caching request " + url + ", response status was " + responseStatus);
+                logger.warn("Error caching request " + url + ", response status was " + responseStatus);
+                return true;
             }
         }
+        return false;
     }
 
     private String urlDecode(final String url) throws UnsupportedEncodingException {

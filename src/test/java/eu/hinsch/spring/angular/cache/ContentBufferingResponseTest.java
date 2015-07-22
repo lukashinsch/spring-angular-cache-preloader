@@ -33,9 +33,21 @@ public class ContentBufferingResponseTest {
     }
 
     @Test
-    public void shouldStoreStatus2() {
+    public void shouldStoreStatusIgnoringMessage() {
         response.setStatus(200, "to be ignored");
         assertThat(response.getStatus(), is(200));
+    }
+
+    @Test
+    public void shouldSendErrorStoreStatus() throws IOException {
+        response.sendError(400);
+        assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    public void shouldSendErrorStoreStatusIgnoringMessage() throws IOException {
+        response.sendError(400, "to be ignored");
+        assertThat(response.getStatus(), is(400));
     }
 
     /**
@@ -52,8 +64,6 @@ public class ContentBufferingResponseTest {
         response.encodeUrl(null);
         response.encodeURL(null);
         response.encodeRedirectUrl(null);
-        response.sendError(0, null);
-        response.sendError(0);
         response.sendRedirect(null);
         response.setDateHeader(null, 0L);
         response.addDateHeader(null, 0L);
