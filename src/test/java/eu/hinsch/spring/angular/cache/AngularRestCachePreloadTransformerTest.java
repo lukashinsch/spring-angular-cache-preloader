@@ -130,47 +130,46 @@ public class AngularRestCachePreloadTransformerTest {
     }
 
     @Test
-    public void shouldThrowExceptionOnClientErrorResponse() throws Exception {
+    public void shouldCacheNothingOnClientErrorResponse() throws Exception {
         // given
         when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
         mockResponse("", 400);
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error caching request /test/url, response status was 400");
 
         // when
-        transformer.transform(request, resource, chain);
+        Resource transformedResource = transformer.transform(request, resource, chain);
 
-        // then -> exception
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, not(containsString("httpCache.put('/test/url', '');")));
     }
 
     @Test
-    public void shouldThrowExceptionOnServerErrorResponse() throws Exception {
+    public void shouldCacheNothingOnServerErrorResponse() throws Exception {
         // given
         when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
         mockResponse("", 500);
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error caching request /test/url, response status was 500");
 
         // when
-        transformer.transform(request, resource, chain);
+        Resource transformedResource = transformer.transform(request, resource, chain);
 
-        // then -> exception
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, not(containsString("httpCache.put('/test/url', '');")));
     }
 
     @Test
-    public void shouldWrapExceptionThrownByDispatchServlet() throws Exception {
+    public void shouldCacheNothingOnExceptionThrownByDispatchServlet() throws Exception {
         // given
         when(config.getCachedUrls()).thenReturn(singletonList(new CachedUrl("/test/url")));
         doThrow(new IllegalArgumentException("my exception"))
                 .when(dispatcherServlet).service(any(ServletRequest.class), any(ServletResponse.class));
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("error caching request /test/url");
-        expectedException.expectCause(instanceOf(IllegalArgumentException.class));
 
         // when
-        transformer.transform(request, resource, chain);
+        Resource transformedResource = transformer.transform(request, resource, chain);
 
-        // then -> exception
+        // then
+        String content = getContent(transformedResource);
+        assertThat(content, not(containsString("httpCache.put('/test/url', '');")));
     }
 
     @Test
