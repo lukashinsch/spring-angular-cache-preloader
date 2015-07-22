@@ -146,7 +146,10 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
     }
 
     private String createScript(final Map<String, String> cache) {
-        Map<String,Object> model = new HashMap<>();
+        if (cache.isEmpty()) {
+            return "";
+        }
+        Map<String, Object> model = new HashMap<>();
         model.put("module", config.getAngularModule());
         model.put("caches", cache.entrySet());
         try {

@@ -112,6 +112,7 @@ public class AngularRestCachePreloadTransformerTest {
         // then
         String content = getContent(transformedResource);
         assertThat(content, not(containsString("httpCache.put('/test/url', '" + REST_RESPONSE + "');")));
+        assertThat(content, not(containsString("var httpCache = $cacheFactory.get('$http');")));
     }
 
     @Test
