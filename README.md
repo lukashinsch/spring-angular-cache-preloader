@@ -14,7 +14,7 @@ This component can be hooked into a Spring WebMVC application to tunnel REST req
 
 ## Gradle dependency
 ```
-compile('eu.hinsch:spring-angular-cache-preloader:0.2.5')
+compile('eu.hinsch:spring-angular-cache-preloader:0.2.6')
 ```
 
 ## Maven dependency
@@ -22,7 +22,7 @@ compile('eu.hinsch:spring-angular-cache-preloader:0.2.5')
 <dependency>
   <groupId>eu.hinsch</groupId>
   <artifactId>spring-angular-cache-preloader</artifactId>
-  <version>0.2.5</version>
+  <version>0.2.6</version>
 </dependency>
 ```
 
