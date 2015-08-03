@@ -83,7 +83,7 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
                 .stream()
                 .filter(this::isEnabled)
                 .map(this::replaceParameters)
-                .forEach(url -> doRequestAndAddToCache(request, cache, url));
+                .forEach(url -> doRequestAndAddToCache(request, cache, url, config.getHeaders()));
 
         return cache;
     }
@@ -115,10 +115,10 @@ public class AngularRestCachePreloadTransformer extends ResourceTransformerSuppo
         }
     }
 
-    private void doRequestAndAddToCache(final HttpServletRequest request, final Map<String, String> cache, final String url) {
+    private void doRequestAndAddToCache(final HttpServletRequest request, final Map<String, String> cache, final String url, Map<String, String> headers) {
         ContentBufferingResponse response = new ContentBufferingResponse();
         try {
-            dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url)), response);
+            dispatcherServlet.service(new UrlRewritingRequestWrapper(request, urlDecode(url), headers), response);
         } catch (Exception e) {
             logger.warn("error caching request " + url, e);
             return;

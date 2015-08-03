@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.6
+- Allow setting headers for the internal request (closes [#15](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/15))
+
 ## 0.2.5
 - Do not throw exception on error but log and cache nothing (closes [#18](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/18))
 - Do not include script when all cached urls are disabled (closes [#14](https://github.com/lukashinsch/spring-angular-cache-preloader/issues/14))
