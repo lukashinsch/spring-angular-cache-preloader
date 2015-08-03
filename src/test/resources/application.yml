@@ -28,6 +28,10 @@ cache-preload:
     - url: /api/status/{status}
       parameters:
         status: 200
+  headers:
+    Accept: application/json
+    Content-Type: application/json
+    X-Some-Header: some-value
 
 server:
   context-path: /test

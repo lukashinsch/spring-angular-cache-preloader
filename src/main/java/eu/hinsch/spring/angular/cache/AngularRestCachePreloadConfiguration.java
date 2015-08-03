@@ -67,8 +67,13 @@ public class AngularRestCachePreloadConfiguration {
         this.encoding = encoding;
     }
 
-    public static class CachedUrl {
+    private Map<String, String> headers = new HashMap<>();
 
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public static class CachedUrl {
         @NotNull
         private String url;
         private Map<String,String> parameters = new HashMap<>();

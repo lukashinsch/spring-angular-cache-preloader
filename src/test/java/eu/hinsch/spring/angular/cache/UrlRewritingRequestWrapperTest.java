@@ -7,6 +7,8 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.Collections;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -27,7 +29,7 @@ public class UrlRewritingRequestWrapperTest {
     @Test
     public void shouldReturnServletPathUnchangedIfStartingWithSlash() {
         // given
-        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test");
+        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test", Collections.emptyMap());
 
         // when
         String servletPath = wrapper.getServletPath();
@@ -39,7 +41,7 @@ public class UrlRewritingRequestWrapperTest {
     @Test
     public void shouldAddMissingSlashToServletPath() {
         // given
-        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "test");
+        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "test", Collections.emptyMap());
 
         // when
         String servletPath = wrapper.getServletPath();
@@ -53,7 +55,7 @@ public class UrlRewritingRequestWrapperTest {
         // given
         when(httpServletRequest.getServletPath()).thenReturn("/original");
         when(httpServletRequest.getContextPath()).thenReturn("/context");
-        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test");
+        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test", Collections.emptyMap());
 
         // when
         String requestURI = wrapper.getRequestURI();
@@ -67,7 +69,7 @@ public class UrlRewritingRequestWrapperTest {
         // given
         when(httpServletRequest.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/context/original"));
         when(httpServletRequest.getServletPath()).thenReturn("/original");
-        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test");
+        UrlRewritingRequestWrapper wrapper = new UrlRewritingRequestWrapper(httpServletRequest, "/test", Collections.emptyMap());
 
         // when
         StringBuffer requestURL = wrapper.getRequestURL();

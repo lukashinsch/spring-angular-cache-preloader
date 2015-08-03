@@ -67,6 +67,12 @@ cache-preload:
   # token in static resource to replace with script, defaults to {cachePreloadScript}
   placeholder: 'mytoken'
   
+  # map of headers to be used on the internal request
+  headers:
+    Accept: application/json
+    Content-Type: application/json
+    X-My-Header: my-value
+  
   cached-urls:
     # static url to be cached (must be the same as configured in $resource)
     - url: some-url
@@ -79,6 +85,15 @@ cache-preload:
         # any SpEL expression (with access to any bean)
         some-param: my-expression
 ```
+
+## Request headers
+By default the original http request made by the browser to retrieve the index page is 
+re-used to "fake" the internal request to the REST endpoint changing only the URL.
+That way all headers sent by the browser (esp. authentication and cookies) are preserved.
+However, this differs slightly from the real AJAX request that would be made as some of the headers would be different (e.g. "Accept"). 
+Also, any headers programmatically set by a javascript client would not be present.
+For this reason, a map of headers used by the internal request can be specified in the environment configuration (see example).
+Note that currently only those headers are supported that are retrieved from the Request object via the getHeader, getHeaders, getIntHeader or getContentType methods. Cookies cannot currently be set.
 
 ## Example
 
