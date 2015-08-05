@@ -53,7 +53,9 @@ public class UrlRewritingRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public Enumeration<String> getHeaders(String name) {
         HashSet<String> values = new HashSet<>(Collections.list(super.getHeaders(name)));
-        values.add(headers.get(name));
+        if (headers.containsKey(name)) {
+            values.add(headers.get(name));
+        }
         return Collections.enumeration(values);
     }
 
